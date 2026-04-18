@@ -1,0 +1,177 @@
+# ci.yml — GitHub Actions CI/CD workflow for bun-based TypeScript projects
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  install:
+    name: Install dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Cache node_modules
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: node_modules-${{ hashFiles('bun.lock') }}
+
+      - name: Install
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: bun install --frozen-lockfile
+
+      - name: Archive node_modules
+        run: tar --zstd -cf node_modules.tar.zst node_modules
+
+      - name: Upload node_modules artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: node_modules
+          path: node_modules.tar.zst
+          retention-days: 1
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Download node_modules artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: node_modules
+
+      - name: Unarchive node_modules
+        run: tar --zstd -xf node_modules.tar.zst
+
+      - name: Lint
+        run: bun run lint
+
+  format:
+    name: Format
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Download node_modules artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: node_modules
+
+      - name: Unarchive node_modules
+        run: tar --zstd -xf node_modules.tar.zst
+
+      - name: Check formatting
+        run: bun run format:check
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Download node_modules artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: node_modules
+
+      - name: Unarchive node_modules
+        run: tar --zstd -xf node_modules.tar.zst
+
+      - name: Test
+        run: bun run test
+
+  commitlint:
+    name: Commitlint
+    runs-on: ubuntu-latest
+    needs: install
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Download node_modules artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: node_modules
+
+      - name: Unarchive node_modules
+        run: tar --zstd -xf node_modules.tar.zst
+
+      - name: Lint commit messages
+        run: bunx commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
+
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    needs: [lint, format, test]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Download node_modules artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: node_modules
+
+      - name: Unarchive node_modules
+        run: tar --zstd -xf node_modules.tar.zst
+
+      # TODO: Customise the steps below for this project's deploy target.
+      # Examples:
+      #   - Cloudflare Pages:  bunx wrangler pages deploy dist/
+      #   - Fly.io:            flyctl deploy --remote-only
+      #   - Docker + registry: docker build & push
+      #   - SST / AWS:         bunx sst deploy --stage production
+      - name: Deploy (placeholder)
+        run: echo "Configure deploy steps for this project"

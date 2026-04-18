@@ -1,0 +1,198 @@
+[user]
+	name = Izzy
+	email = izzy@izelya.me
+
+[core]
+	editor = zed --wait
+	autocrlf = input
+	whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol
+	excludesfile = ~/.gitignore_global
+	pager = less -FRX
+
+[init]
+	defaultBranch = main
+
+[color]
+	ui = true
+	branch = auto
+	diff = auto
+	status = auto
+
+[color "branch"]
+	current = yellow bold
+	local = green bold
+	remote = cyan bold
+
+[color "diff"]
+	meta = yellow bold
+	frag = magenta bold
+	old = red bold
+	new = green bold
+	whitespace = red reverse
+
+[color "status"]
+	added = green bold
+	changed = yellow bold
+	untracked = red bold
+
+[push]
+	default = current
+	autoSetupRemote = true
+
+[pull]
+	rebase = false
+
+[fetch]
+	prune = true
+
+[rebase]
+	autoStash = true
+
+[merge]
+	conflictstyle = diff3
+	tool = zed
+
+[diff]
+	colorMoved = default
+	algorithm = histogram
+
+[credential]
+	helper = osxkeychain
+
+[help]
+	autocorrect = 20
+
+[alias]
+	# Status
+	s        = status
+	st       = status -sb
+
+	# Add
+	a        = add -A
+	aa       = add -A
+	ap       = add -p
+
+	# Commit
+	c        = commit -m
+	ca       = commit --amend
+	can      = commit --amend --no-edit
+	ce       = commit --allow-empty -m
+
+	# Push & Pull
+	p        = pull
+	pu       = push
+	puu      = push -u origin HEAD
+	pf       = push --force-with-lease
+	pn       = push --no-verify
+
+	# Fetch
+	f        = fetch
+	fa       = fetch --all
+
+	# Branch
+	b        = branch
+	ba       = branch -a
+	bd       = branch -d
+	bD       = branch -D
+	bm       = branch -m
+	bl       = branch --list
+
+	# Checkout
+	co       = checkout
+	cob      = checkout -b
+
+	# Switch (modern git)
+	sw       = switch
+	swc      = switch -c
+	swd      = switch --detach
+
+	# Merge
+	m        = merge
+	mff      = merge --ff-only
+	mnff     = merge --no-ff
+
+	# Rebase
+	r        = rebase
+	ri       = rebase -i
+	rc       = rebase --continue
+	ra       = rebase --abort
+	rsk      = rebase --skip
+	rod      = rebase origin/develop
+	rom      = rebase origin/main
+
+	# Log — pretty graph
+	l        = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+	# Log — oneline
+	ll       = log --oneline
+	# Log — oneline all branches
+	la       = log --oneline --all
+	# Log — full stat
+	lf       = log --stat --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset'
+	# Log — show who changed what file
+	lp       = log --all --full-history
+
+	# Diff
+	d        = diff
+	ds       = diff --staged
+	dw       = diff --word-diff
+	dc       = diff --cached
+
+	# Restore
+	rs       = restore --staged
+
+	# Reset
+	unstage  = reset HEAD --
+	undo     = reset --soft HEAD~1
+	nuke     = reset --hard HEAD
+
+	# Cherry-pick
+	cp       = cherry-pick
+	cpc      = cherry-pick --continue
+	cpa      = cherry-pick --abort
+
+	# Stash
+	sl       = stash list
+	ss       = stash save
+	sp       = stash pop
+	sa       = stash apply
+	sd       = stash drop
+	sc       = stash clear
+
+	# Tag
+	t        = tag
+	ta       = tag -a
+	td       = tag -d
+
+	# Remote
+	rv       = remote -v
+	ra       = remote add
+	rr       = remote remove
+
+	# Submodule
+	sub      = submodule update --init --recursive
+
+	# Bisect
+	bs       = bisect start
+	bg       = bisect good
+	bb       = bisect bad
+	br       = bisect reset
+
+	# Useful one-liners
+	last     = log -1 HEAD --stat
+	aliases  = config --get-regexp alias
+	who      = shortlog -n -s --no-merges
+	cleanup  = remote prune origin
+	root     = rev-parse --show-toplevel
+
+	# Find commits by message
+	find     = log --all --pretty=format:'%Cred%h%Creset %s' --grep
+
+	# Show what would be pushed
+	outgoing = log @{u}.. --oneline
+	incoming = log ..@{u} --oneline
+
+	# Interactive rebase on upstream
+	tidy     = rebase -i @{u}
+
+	# Current branch name
+	current  = rev-parse --abbrev-ref HEAD

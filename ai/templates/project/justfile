@@ -1,0 +1,93 @@
+# justfile — project task runner template
+# https://just.systems
+
+set shell := ["sh", "-c"]
+
+# List all available recipes
+default:
+    @just --list
+
+# ── Dependencies ───────────────────────────────────────────────────────────────
+
+# Install dependencies
+install:
+    bun install
+
+# ── Development ────────────────────────────────────────────────────────────────
+
+# Start the development server
+dev:
+    bun run dev
+
+# Build for production
+build:
+    bun run build
+
+# ── Testing ────────────────────────────────────────────────────────────────────
+
+# Run tests once
+test:
+    bun run test
+
+# Run tests in watch mode
+test-watch:
+    bun run test:watch
+
+# Run tests with coverage report
+test-coverage:
+    bun run test:coverage
+
+# ── Linting ────────────────────────────────────────────────────────────────────
+
+# Lint source files
+lint:
+    bunx oxlint src/
+
+# Lint source files and auto-fix where possible
+lint-fix:
+    bunx oxlint --fix src/
+
+# ── Formatting ─────────────────────────────────────────────────────────────────
+
+# Format all files in place
+format:
+    bunx oxfmt --write .
+
+# Check formatting without writing changes
+format-check:
+    bunx oxfmt --check .
+
+# ── Changelog ──────────────────────────────────────────────────────────────────
+
+# Remind to update CHANGELOG.md before releasing
+changelog:
+    @echo "──────────────────────────────────────────────────"
+    @echo "  Please update CHANGELOG.md before releasing."
+    @echo "  Move items from [Unreleased] to a new version"
+    @echo "  section, e.g. [1.2.0] - $(date +%Y-%m-%d)"
+    @echo "  Entries should describe behaviour, not files."
+    @echo "──────────────────────────────────────────────────"
+
+# ── Git ────────────────────────────────────────────────────────────────────────
+
+# Create a WIP commit with a message
+commit msg:
+    git commit -m "{{msg}}"
+
+# Run checks, tag a release version, and push with tags
+release version:
+    just check
+    git tag v{{version}}
+    git push --follow-tags
+
+# ── Composite ──────────────────────────────────────────────────────────────────
+
+# Run format check, lint, and tests in sequence
+check: format-check lint test
+
+# CI pipeline — frozen install then full check
+ci:
+    bun install --frozen-lockfile
+    just format-check
+    just lint
+    just test

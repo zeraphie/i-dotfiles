@@ -1,0 +1,143 @@
+# ============================================================
+# Ghostty Configuration
+# Izzy (zeraphie) — i-dotfiles
+#
+# Platform: macOS / Linux
+# On Windows, use WezTerm instead — see wezterm/wezterm.lua
+# ============================================================
+
+# ------------------------------------------------------------
+# Shell
+# ------------------------------------------------------------
+command = fish
+shell-integration = fish
+
+# ------------------------------------------------------------
+# Font
+# ------------------------------------------------------------
+font-family = "JetBrainsMono Nerd Font"
+font-family-fallback = "JetBrains Mono"
+font-size = 13
+font-thicken = true
+
+# ------------------------------------------------------------
+# Theme / Colours
+# Palette based on the classic #1D1F20 dark background
+# ------------------------------------------------------------
+background = 1d1f20
+foreground = c5c8c6
+
+# Black
+palette = 0=#1d1f20
+palette = 8=#4b4f52
+
+# Red
+palette = 1=#cc6666
+palette = 9=#d54e53
+
+# Green
+palette = 2=#b5bd68
+palette = 10=#8ec07c
+
+# Yellow
+palette = 3=#f0c674
+palette = 11=#e7c547
+
+# Blue
+palette = 4=#81a2be
+palette = 12=#7aa6da
+
+# Magenta
+palette = 5=#b294bb
+palette = 13=#c397d8
+
+# Cyan
+palette = 6=#8abeb7
+palette = 14=#70c0ba
+
+# White
+palette = 7=#c5c8c6
+palette = 15=#ffffff
+
+# Cursor
+cursor-color = c5c8c6
+cursor-text = 1d1f20
+cursor-style = bar
+cursor-style-blink = true
+
+# Selection
+selection-background = 373b41
+selection-foreground = c5c8c6
+
+# ------------------------------------------------------------
+# Window
+# ------------------------------------------------------------
+window-decoration = true
+window-padding-x = 12
+window-padding-y = 10
+window-padding-balance = true
+
+# Start maximised — comment out if you prefer a smaller window
+# window-width  = 220
+# window-height = 50
+
+title = ""
+window-inherit-working-directory = true
+
+# ------------------------------------------------------------
+# Scrollback
+# ------------------------------------------------------------
+scrollback-limit = 10000
+
+# ------------------------------------------------------------
+# Performance / Rendering
+# ------------------------------------------------------------
+# GPU-accelerated rendering is on by default in Ghostty.
+# The option below keeps frame-rate reasonable without pegging
+# a GPU core when the terminal is idle.
+fps-cap = 120
+
+# ------------------------------------------------------------
+# Keybindings
+# ------------------------------------------------------------
+# New tab / window
+keybind = ctrl+t=new_tab
+keybind = ctrl+n=new_window
+
+# Tab navigation
+keybind = ctrl+shift+right=next_tab
+keybind = ctrl+shift+left=previous_tab
+
+# Split panes
+keybind = ctrl+shift+d=new_split:right
+keybind = ctrl+shift+e=new_split:down
+
+# Move between splits
+keybind = ctrl+shift+h=goto_split:left
+keybind = ctrl+shift+l=goto_split:right
+keybind = ctrl+shift+k=goto_split:top
+keybind = ctrl+shift+j=goto_split:bottom
+
+# Font size
+keybind = ctrl+equal=increase_font_size:1
+keybind = ctrl+minus=decrease_font_size:1
+keybind = ctrl+zero=reset_font_size
+
+# Copy / paste
+keybind = ctrl+shift+c=copy_to_clipboard
+keybind = ctrl+shift+v=paste_from_clipboard
+
+# Clear scrollback
+keybind = ctrl+l=clear_screen
+
+# ------------------------------------------------------------
+# Mouse
+# ------------------------------------------------------------
+mouse-hide-while-typing = true
+focus-follows-mouse = false
+
+# ------------------------------------------------------------
+# Miscellaneous
+# ------------------------------------------------------------
+confirm-close-surface = false
+quit-after-last-window-closed = true

@@ -1,0 +1,18 @@
+# mise global tool configuration
+# https://mise.jdx.dev/configuration.html
+#
+# This file sets the global default versions for all tools managed by mise.
+# Project-level .mise.toml files will override these on a per-directory basis.
+
+[tools]
+node    = "lts"
+bun     = "latest"
+python  = "latest"
+rust    = "latest"
+
+[settings]
+# Always use the closest .mise.toml when inside a project
+experimental = true
+
+# Automatically activate tools when entering a directory
+activate_aggressive = false

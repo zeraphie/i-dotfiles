@@ -1,0 +1,11 @@
+{
+  "assistant": {
+    "default_model": {
+      "provider": "anthropic",
+      "model": "claude-sonnet-4-5"
+    },
+    "version": "2"
+  },
+  "context_servers": {},
+  "rules_file": ".zed/rules.md"
+}

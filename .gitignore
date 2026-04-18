@@ -1,0 +1,64 @@
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# Machine-local overrides (put machine-specific stuff here, never commit it)
+local/
+*.local
+*.local.fish
+*.local.toml
+*.local.sh
+
+# Secrets / environment variables — never commit these
+.env
+.env.*
+!.env.example
+
+# Editor artefacts
+.zed/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Node / Bun
+node_modules/
+.npm/
+.bun/
+bun.lockb
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.Python
+
+# Rust
+target/
+
+# Logs
+*.log
+logs/
+
+# OS temp files
+*.tmp
+*.temp

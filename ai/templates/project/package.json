@@ -1,0 +1,39 @@
+{
+  "name": "project-name",
+  "version": "0.0.1",
+  "description": "",
+  "type": "module",
+  "scripts": {
+    "dev": "bun run src/index.ts",
+    "build": "bun build src/index.ts --outdir dist --target node",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "bunx oxlint src/",
+    "lint:fix": "bunx oxlint --fix src/",
+    "format": "bunx oxfmt --write .",
+    "format:check": "bunx oxfmt --check .",
+    "check": "bun run format:check && bun run lint && bun run test",
+    "commitlint": "commitlint --edit",
+    "version": "bun run changelog && git add CHANGELOG.md"
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@commitlint/cli": "^19.0.0",
+    "@commitlint/config-conventional": "^19.0.0",
+    "@vitest/coverage-v8": "^3.0.0",
+    "commitlint": "^19.0.0",
+    "oxlint": "^0.16.0",
+    "oxfmt": "^0.2.0",
+    "vitest": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18",
+    "bun": ">=1"
+  }
+}

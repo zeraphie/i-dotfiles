@@ -1,0 +1,226 @@
+// Component.scss — styles for the Component atom/molecule/organism
+
+// ── Design tokens ──────────────────────────────────────────────────────────────
+
+:root {
+  --unit: 8px;
+
+  --component-bg: #ffffff;
+  --component-fg: #1a1a1a;
+  --component-border: #e0e0e0;
+  --component-accent: #6c63ff;
+  --component-accent-hover: #574fd6;
+  --component-radius: 4px;
+
+  --component-transition-duration: 200ms;
+  --component-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// ── Variables ──────────────────────────────────────────────────────────────────
+
+$pixel: 2px;
+$component-padding-x: calc(var(--unit) * 2);
+$component-padding-y: calc(var(--unit) * 1.5);
+
+// ── Pixel-art dot grid shadow mixin ───────────────────────────────────────────
+
+// Usage: @include pixel-dot-grid(var(--component-accent));
+@mixin pixel-dot-grid($color) {
+  box-shadow:
+    // Top left
+    0 0 0 $pixel $color,
+    // Top right
+    calc(var(--unit) * 3) 0 0 $pixel $color,
+    // Bottom left
+    0 calc(var(--unit) * 3) 0 $pixel $color,
+    // Bottom right
+    calc(var(--unit) * 3) calc(var(--unit) * 3) 0 $pixel $color;
+}
+
+// ── Block ──────────────────────────────────────────────────────────────────────
+
+.component {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--unit) * 1);
+
+  padding: $component-padding-y $component-padding-x;
+
+  background-color: var(--component-bg);
+  color: var(--component-fg);
+  border: 1px solid var(--component-border);
+  border-radius: var(--component-radius);
+
+  // ── Element: header ──────────────────────────────────────────────────────────
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: calc(var(--unit) * 1);
+
+    padding-bottom: calc(var(--unit) * 1);
+    border-bottom: 1px solid var(--component-border);
+  }
+
+  &__title {
+    margin: 0;
+
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--component-fg);
+  }
+
+  // ── Element: body ────────────────────────────────────────────────────────────
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--unit) * 1);
+  }
+
+  &__text {
+    margin: 0;
+
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--component-fg);
+  }
+
+  // ── Element: icon ────────────────────────────────────────────────────────────
+
+  &__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    width: calc(var(--unit) * 3);
+    height: calc(var(--unit) * 3);
+
+    color: var(--component-accent);
+
+    will-change: transform;
+    transition:
+      transform var(--component-transition-duration) var(--component-transition-easing),
+      color var(--component-transition-duration) var(--component-transition-easing);
+
+    &:hover {
+      transform: translate3d(0, -2px, 0);
+      color: var(--component-accent-hover);
+    }
+  }
+
+  // ── Element: action ──────────────────────────────────────────────────────────
+
+  &__action {
+    display: inline-flex;
+    align-items: center;
+    gap: calc(var(--unit) * 0.5);
+
+    padding: calc(var(--unit) * 0.75) calc(var(--unit) * 1.5);
+
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #ffffff;
+    background-color: var(--component-accent);
+    border: none;
+    border-radius: var(--component-radius);
+    cursor: pointer;
+
+    will-change: transform, background-color;
+    transition:
+      transform var(--component-transition-duration) var(--component-transition-easing),
+      background-color var(--component-transition-duration) var(--component-transition-easing);
+
+    &:hover {
+      transform: translate3d(0, -1px, 0);
+      background-color: var(--component-accent-hover);
+    }
+
+    &:active {
+      transform: translate3d(0, 0, 0);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--component-accent);
+      outline-offset: 2px;
+    }
+
+    // ── Modifier: secondary ────────────────────────────────────────────────────
+
+    &--secondary {
+      color: var(--component-accent);
+      background-color: transparent;
+      border: 1px solid var(--component-accent);
+
+      &:hover {
+        background-color: color-mix(in srgb, var(--component-accent) 10%, transparent);
+      }
+    }
+  }
+
+  // ── Element: footer ──────────────────────────────────────────────────────────
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: calc(var(--unit) * 1);
+
+    padding-top: calc(var(--unit) * 1);
+    border-top: 1px solid var(--component-border);
+  }
+
+  // ── Modifier: highlighted ─────────────────────────────────────────────────
+
+  &--highlighted {
+    border-color: var(--component-accent);
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: var(--component-radius);
+      pointer-events: none;
+
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--component-accent) 20%, transparent);
+    }
+  }
+
+  // ── Modifier: loading ─────────────────────────────────────────────────────
+
+  &--loading {
+    pointer-events: none;
+    opacity: 0.6;
+
+    will-change: opacity;
+    transition: opacity var(--component-transition-duration) var(--component-transition-easing);
+  }
+
+  // ── Modifier: compact ─────────────────────────────────────────────────────
+
+  &--compact {
+    padding: calc(var(--unit) * 1) calc(var(--unit) * 1.5);
+    gap: calc(var(--unit) * 0.5);
+  }
+}
+
+// ── Responsive ────────────────────────────────────────────────────────────────
+
+@media (max-width: 640px) {
+  .component {
+    padding: calc(var(--unit) * 1) calc(var(--unit) * 1.5);
+
+    &__footer {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    &__action {
+      justify-content: center;
+    }
+  }
+}

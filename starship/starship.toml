@@ -1,0 +1,195 @@
+# ============================================================
+# Starship Prompt Configuration
+# https://starship.rs/config/
+# Izzy / zeraphie
+# ============================================================
+
+# Wait 10ms for starship to check files in the current directory
+scan_timeout = 10
+
+# Timeout for commands executed by starship (in milliseconds)
+command_timeout = 1000
+
+# A continuation prompt that displays two filled-in triangles
+continuation_prompt = "[▸▸](dimmed white) "
+
+# ── Format ────────────────────────────────────────────────────────────────────
+# Two-line prompt:
+#   Line 1: directory · git info · runtime versions · duration
+#   Line 2: the prompt character
+format = """
+$os\
+$username\
+$hostname\
+$directory\
+$git_branch\
+$git_status\
+$git_state\
+$nodejs\
+$bun\
+$rust\
+$python\
+$cmd_duration\
+$line_break\
+$character"""
+
+# ── OS ────────────────────────────────────────────────────────────────────────
+[os]
+disabled = false
+format = "[$symbol](bold white) "
+
+[os.symbols]
+Macos   = "󰀵"
+Linux   = "󰌽"
+Windows = "󰍲"
+Ubuntu  = "󰕈"
+Debian  = "󰣚"
+Arch    = "󰣇"
+Unknown = "?"
+
+# ── Username ──────────────────────────────────────────────────────────────────
+[username]
+show_always = false
+format      = "[$user]($style)[@](dimmed white)"
+style_user  = "bold cyan"
+style_root  = "bold red"
+
+# ── Hostname ──────────────────────────────────────────────────────────────────
+[hostname]
+ssh_only = true
+format   = "[$hostname](bold yellow) "
+trim_at  = "."
+
+# ── Directory ─────────────────────────────────────────────────────────────────
+[directory]
+format            = "[ $path]($style)[$read_only]($read_only_style) "
+style             = "bold #89b4fa"          # Catppuccin-ish blue
+read_only         = "  "
+read_only_style   = "bold red"
+truncation_length = 4
+truncate_to_repo  = true
+home_symbol       = "~"
+
+[directory.substitutions]
+"Documents" = "󰈙 Docs"
+"Downloads" = " Downloads"
+"Music"     = " Music"
+"Pictures"  = " Pics"
+"Desktop"   = "󰇄 Desktop"
+"Developer" = "󰲋 Dev"
+"Development" = "󰲋 Dev"
+
+# ── Git branch ────────────────────────────────────────────────────────────────
+[git_branch]
+symbol    = " "
+format    = "[on ](dimmed white)[$symbol$branch(:$remote_branch)]($style) "
+style     = "bold #cba6f7"   # purple
+truncation_length = 24
+truncation_symbol = "…"
+
+# ── Git status ────────────────────────────────────────────────────────────────
+[git_status]
+format      = "([$all_status$ahead_behind]($style) )"
+style       = "bold #f38ba8"   # red
+ahead       = "⇡${count}"
+behind      = "⇣${count}"
+diverged    = "⇕⇡${ahead_count}⇣${behind_count}"
+conflicted  = "󰞇 "
+untracked   = "? "
+stashed     = "󰏗 "
+modified    = "! "
+staged      = "+ "
+renamed     = "» "
+deleted     = "✘ "
+
+# ── Git state (rebasing, merging, etc.) ───────────────────────────────────────
+[git_state]
+format = "\([$state( $progress_current/$progress_total)](bold yellow)\) "
+rebase = "REBASING"
+merge  = "MERGING"
+revert = "REVERTING"
+cherry_pick = "CHERRY-PICKING"
+bisect = "BISECTING"
+am     = "AM"
+am_or_rebase = "AM/REBASE"
+
+# ── Node.js ───────────────────────────────────────────────────────────────────
+[nodejs]
+symbol             = " "
+format             = "[via $symbol$version]($style) "
+style              = "bold #a6e3a1"   # green
+detect_extensions  = ["js", "mjs", "cjs", "ts", "mts", "cts"]
+detect_files       = ["package.json", ".node-version", ".nvmrc"]
+detect_folders     = ["node_modules"]
+version_format     = "v${major}.${minor}"
+
+# ── Bun ───────────────────────────────────────────────────────────────────────
+[bun]
+symbol            = "🍞 "
+format            = "[via $symbol$version]($style) "
+style             = "bold #fab387"   # peach/orange
+version_format    = "v${major}.${minor}"
+detect_extensions = []
+detect_files      = ["bun.lockb", "bun.lock", "bunfig.toml"]
+detect_folders    = []
+
+# ── Rust ──────────────────────────────────────────────────────────────────────
+[rust]
+symbol            = "🦀 "
+format            = "[via $symbol$version]($style) "
+style             = "bold #fe640b"   # orange-red
+version_format    = "v${major}.${minor}"
+detect_extensions = ["rs"]
+detect_files      = ["Cargo.toml"]
+
+# ── Python ────────────────────────────────────────────────────────────────────
+[python]
+symbol            = "🐍 "
+format            = "[via $symbol$version( \\($virtualenv\\))]($style) "
+style             = "bold #f9e2af"   # yellow
+version_format    = "v${major}.${minor}"
+detect_extensions = ["py", "pyw", "ipynb"]
+detect_files      = [
+    "pyproject.toml",
+    "Pipfile",
+    "setup.py",
+    "setup.cfg",
+    "requirements.txt",
+    ".python-version",
+]
+python_binary     = ["python3", "python"]
+
+# ── Command duration ──────────────────────────────────────────────────────────
+[cmd_duration]
+min_time          = 2_000   # only show if command took > 2s
+format            = "[󱦟 $duration]($style) "
+style             = "bold #6c7086"   # grey
+show_milliseconds = false
+
+# ── Prompt character ──────────────────────────────────────────────────────────
+[character]
+success_symbol = "[❯](bold #89b4fa)"   # blue on success
+error_symbol   = "[❯](bold #f38ba8)"   # red on error
+vimcmd_symbol  = "[❮](bold #a6e3a1)"   # green in vi-normal mode
+
+# ── Modules that are explicitly disabled ──────────────────────────────────────
+[package]
+disabled = true
+
+[docker_context]
+disabled = true
+
+[aws]
+disabled = true
+
+[gcloud]
+disabled = true
+
+[terraform]
+disabled = true
+
+[kubernetes]
+disabled = true
+
+[nix_shell]
+disabled = true
