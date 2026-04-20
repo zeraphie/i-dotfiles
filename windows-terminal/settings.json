@@ -1,0 +1,98 @@
+{
+    "$help": "https://aka.ms/terminal-documentation",
+    "$schema": "https://aka.ms/terminal-profiles-schema",
+    "defaultProfile": "{2c4de342-38b7-51cf-b940-2309a097f518}",
+    "copyFormatting": "none",
+    "copyOnSelect": false,
+    "theme": "i-dotfiles",
+    "themes": [
+        {
+            "name": "i-dotfiles",
+            "tab": {
+                "background": "#1D1F20FF",
+                "showCloseButton": "always",
+                "unfocusedBackground": "#151718FF"
+            },
+            "window": {
+                "applicationTheme": "dark"
+            }
+        }
+    ],
+    "schemes": [
+        {
+            "name": "i-dotfiles",
+            "background": "#1D1F20",
+            "foreground": "#EFEFEF",
+            "cursorColor": "#EFEFEF",
+            "selectionBackground": "#9FB8D8",
+            "black": "#1D1F20",
+            "brightBlack": "#4B4F52",
+            "red": "#CC6666",
+            "brightRed": "#D54E53",
+            "green": "#B5BD68",
+            "brightGreen": "#8EC07C",
+            "yellow": "#F0C674",
+            "brightYellow": "#E7C547",
+            "blue": "#81A2BE",
+            "brightBlue": "#7AA6DA",
+            "purple": "#B294BB",
+            "brightPurple": "#C397D8",
+            "cyan": "#8ABEB7",
+            "brightCyan": "#70C0BA",
+            "white": "#C5C8C6",
+            "brightWhite": "#FFFFFF"
+        }
+    ],
+    "profiles": {
+        "defaults": {
+            "colorScheme": "i-dotfiles",
+            "font": {
+                "face": "FiraCode Nerd Font Mono",
+                "size": 13,
+                "weight": "normal"
+            },
+            "cursorShape": "bar",
+            "padding": "12, 10, 12, 10",
+            "scrollbarState": "hidden",
+            "antialiasingMode": "cleartype"
+        },
+        "list": [
+            {
+                "name": "Git Bash",
+                "guid": "{2c4de342-38b7-51cf-b940-2309a097f518}",
+                "commandline": "C:\\Program Files\\Git\\bin\\bash.exe -l",
+                "icon": "C:\\Program Files\\Git\\mingw64\\share\\git\\git-for-windows.ico",
+                "startingDirectory": "%USERPROFILE%"
+            },
+            {
+                "name": "PowerShell",
+                "guid": "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}",
+                "commandline": "powershell.exe",
+                "hidden": false
+            },
+            {
+                "name": "Command Prompt",
+                "guid": "{0caa0dad-35be-5f56-a8ff-afceeeaa6101}",
+                "commandline": "cmd.exe",
+                "hidden": true
+            }
+        ]
+    },
+    "actions": [
+        { "command": { "action": "newTab" }, "keys": "ctrl+t" },
+        { "command": { "action": "splitPane", "split": "horizontal" }, "keys": "ctrl+shift+e" },
+        { "command": { "action": "splitPane", "split": "vertical" }, "keys": "ctrl+shift+d" },
+        { "command": { "action": "nextTab" }, "keys": "ctrl+shift+right" },
+        { "command": { "action": "prevTab" }, "keys": "ctrl+shift+left" },
+        { "command": { "action": "moveFocus", "direction": "left" }, "keys": "ctrl+shift+h" },
+        { "command": { "action": "moveFocus", "direction": "right" }, "keys": "ctrl+shift+l" },
+        { "command": { "action": "moveFocus", "direction": "up" }, "keys": "ctrl+shift+k" },
+        { "command": { "action": "moveFocus", "direction": "down" }, "keys": "ctrl+shift+j" },
+        { "command": { "action": "adjustFontSize", "delta": 1 }, "keys": "ctrl+=" },
+        { "command": { "action": "adjustFontSize", "delta": -1 }, "keys": "ctrl+-" },
+        { "command": "resetFontSize", "keys": "ctrl+0" },
+        { "command": "find", "keys": "ctrl+shift+f" },
+        { "command": { "action": "copy", "singleLine": false }, "keys": "ctrl+shift+c" },
+        { "command": "paste", "keys": "ctrl+shift+v" }
+    ]
+}

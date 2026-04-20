@@ -19,7 +19,7 @@ alias b='c -'
 # ── File listing ──────────────────────────────────────────────────────────────
 # -l long format  -a all files  -h human-readable sizes
 # No -G needed in Fish; colour is handled by the terminal / $LS_COLORS
-alias l='ls -lah'
+alias l='ls -laG'
 
 # ── Editor ────────────────────────────────────────────────────────────────────
 alias e='zed'

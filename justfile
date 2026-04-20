@@ -56,7 +56,6 @@ link:
     _link "$DOTFILES/fish/aliases.fish"      "$HOME/.config/fish/aliases.fish"
     _link "$DOTFILES/starship/starship.toml" "$HOME/.config/starship.toml"
     _link "$DOTFILES/ghostty/config"         "$HOME/.config/ghostty/config"
-    _link "$DOTFILES/wezterm/wezterm.lua"    "$HOME/.wezterm.lua"
     _link "$DOTFILES/mise/config.toml"       "$HOME/.config/mise/config.toml"
     _link "$DOTFILES/git/.gitconfig"         "$HOME/.gitconfig"
 
@@ -102,12 +101,6 @@ edit-git:
 # Open ghostty config in Zed
 edit-ghostty:
     zed {{justfile_directory()}}/ghostty/config
-
-# ── WezTerm ───────────────────────────────────────────────────────────────────
-
-# Open wezterm config in Zed
-edit-wezterm:
-    zed {{justfile_directory()}}/wezterm/wezterm.lua
 
 # ── Mise ──────────────────────────────────────────────────────────────────────
 
@@ -201,7 +194,6 @@ verify:
     _check "$DOTFILES/fish/aliases.fish"      "$HOME/.config/fish/aliases.fish"
     _check "$DOTFILES/starship/starship.toml" "$HOME/.config/starship.toml"
     _check "$DOTFILES/ghostty/config"         "$HOME/.config/ghostty/config"
-    _check "$DOTFILES/wezterm/wezterm.lua"    "$HOME/.wezterm.lua"
     _check "$DOTFILES/mise/config.toml"       "$HOME/.config/mise/config.toml"
     _check "$DOTFILES/git/.gitconfig"         "$HOME/.gitconfig"
 

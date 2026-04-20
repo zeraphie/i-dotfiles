@@ -25,16 +25,18 @@ CYAN='\033[0;36m'
 BOLD='\033[1m'
 RESET='\033[0m'
 
-info()    { printf "${BLUE}${BOLD}  →${RESET}  %s\n" "$*"; }
-success() { printf "${GREEN}${BOLD}  ✓${RESET}  %s\n" "$*"; }
-warn()    { printf "${YELLOW}${BOLD}  !${RESET}  %s\n" "$*"; }
-error()   { printf "${RED}${BOLD}  ✗${RESET}  %s\n" "$*" >&2; }
+info()    { printf "${BLUE}${BOLD}  →${RESET}  %b\n" "$*"; }
+success() { printf "${GREEN}${BOLD}  ✓${RESET}  %b\n" "$*"; }
+warn()    { printf "${YELLOW}${BOLD}  !${RESET}  %b\n" "$*"; }
+error()   { printf "${RED}${BOLD}  ✗${RESET}  %b\n" "$*" >&2; }
 header()  { printf "\n${MAGENTA}${BOLD}══  %s${RESET}\n\n" "$*"; }
 
 confirm() {
     local prompt="${1:-Continue?}"
     read -r -p "$(printf "${CYAN}  ?  ${RESET}${prompt} [y/N] ")" answer
-    [[ "${answer,,}" == "y" || "${answer,,}" == "yes" ]]
+    local lower
+    lower="$(printf '%s' "$answer" | tr '[:upper:]' '[:lower:]')"
+    [[ "$lower" == "y" || "$lower" == "yes" ]]
 }
 
 has() { command -v "$1" &>/dev/null; }
@@ -153,7 +155,7 @@ setup_macos() {
     fi
 
     # Core tools
-    local brew_packages=(fish starship mise just git)
+    local brew_packages=(fish starship mise just git git-extras)
     for pkg in "${brew_packages[@]}"; do
         if brew list "$pkg" &>/dev/null; then
             success "$pkg already installed"
@@ -171,15 +173,6 @@ setup_macos() {
         success "Ghostty installed"
     else
         success "Ghostty already installed"
-    fi
-
-    # WezTerm
-    if ! has wezterm; then
-        info "Installing WezTerm..."
-        brew install --cask wezterm
-        success "WezTerm installed"
-    else
-        success "WezTerm already installed"
     fi
 
     # Bun
@@ -205,13 +198,33 @@ setup_macos() {
     # Add dotfiles bin to PATH for current session
     export PATH="$PATH:$DOTFILES/bin"
 
+    # Fonts
+    header "Installing fonts"
+    local font_dir="$HOME/Library/Fonts"
+    mkdir -p "$font_dir"
+    local fonts_installed=0
+    for ttf in "$DOTFILES/fonts/"**/*.ttf "$DOTFILES/fonts/"**/*.otf; do
+        [[ -f "$ttf" ]] || continue
+        local fname
+        fname="$(basename "$ttf")"
+        if [[ -f "$font_dir/$fname" ]]; then
+            success "Already installed: $fname"
+        else
+            cp "$ttf" "$font_dir/$fname"
+            success "Installed: $fname"
+            fonts_installed=$((fonts_installed + 1))
+        fi
+    done
+    if [[ $fonts_installed -gt 0 ]]; then
+        success "Installed $fonts_installed font(s)"
+    fi
+
     # Symlinks
     header "Creating symlinks"
     make_link "$DOTFILES/fish/config.fish"       "$HOME/.config/fish/config.fish"
     make_link "$DOTFILES/fish/aliases.fish"       "$HOME/.config/fish/aliases.fish"
     make_link "$DOTFILES/starship/starship.toml"  "$HOME/.config/starship.toml"
     make_link "$DOTFILES/ghostty/config"          "$HOME/.config/ghostty/config"
-    make_link "$DOTFILES/wezterm/wezterm.lua"     "$HOME/.wezterm.lua"
     make_link "$DOTFILES/mise/config.toml"        "$HOME/.config/mise/config.toml"
     make_link "$DOTFILES/git/.gitconfig"          "$HOME/.gitconfig"
 
@@ -292,6 +305,20 @@ setup_linux() {
         success "Just already installed"
     fi
 
+    # Git Extras (provides git repl, git changelog, etc.)
+    if ! command -v git-extras &>/dev/null; then
+        info "Installing git-extras..."
+        case "$OS" in
+            debian) sudo apt-get install -y git-extras ;;
+            arch)   sudo pacman -S --noconfirm git-extras ;;
+            fedora) sudo dnf install -y git-extras ;;
+            *)      curl -sSL https://raw.githubusercontent.com/tj/git-extras/main/install.sh | sudo bash /dev/stdin ;;
+        esac
+        success "git-extras installed"
+    else
+        success "git-extras already installed"
+    fi
+
     # Bun
     if ! has bun; then
         info "Installing Bun..."
@@ -314,13 +341,34 @@ setup_linux() {
     # Add dotfiles bin to PATH for current session
     export PATH="$PATH:$DOTFILES/bin"
 
+    # Fonts
+    header "Installing fonts"
+    local font_dir="$HOME/.local/share/fonts"
+    mkdir -p "$font_dir"
+    local fonts_installed=0
+    for ttf in "$DOTFILES/fonts/"**/*.ttf "$DOTFILES/fonts/"**/*.otf; do
+        [[ -f "$ttf" ]] || continue
+        local fname
+        fname="$(basename "$ttf")"
+        if [[ -f "$font_dir/$fname" ]]; then
+            success "Already installed: $fname"
+        else
+            cp "$ttf" "$font_dir/$fname"
+            success "Installed: $fname"
+            fonts_installed=$((fonts_installed + 1))
+        fi
+    done
+    if [[ $fonts_installed -gt 0 ]]; then
+        fc-cache -f "$font_dir" 2>/dev/null || true
+        success "Installed $fonts_installed font(s) and refreshed font cache"
+    fi
+
     # Symlinks
     header "Creating symlinks"
     make_link "$DOTFILES/fish/config.fish"       "$HOME/.config/fish/config.fish"
     make_link "$DOTFILES/fish/aliases.fish"       "$HOME/.config/fish/aliases.fish"
     make_link "$DOTFILES/starship/starship.toml"  "$HOME/.config/starship.toml"
     make_link "$DOTFILES/ghostty/config"          "$HOME/.config/ghostty/config"
-    make_link "$DOTFILES/wezterm/wezterm.lua"     "$HOME/.wezterm.lua"
     make_link "$DOTFILES/mise/config.toml"        "$HOME/.config/mise/config.toml"
     make_link "$DOTFILES/git/.gitconfig"          "$HOME/.gitconfig"
 
@@ -371,14 +419,13 @@ setup_windows() {
     make_link "$DOTFILES/git/.gitconfig" "$HOME/.gitconfig" 2>/dev/null \
         || warn "Could not symlink .gitconfig — run install.ps1 as Admin to create symlinks"
 
-    # WezTerm config
-    make_link "$DOTFILES/wezterm/wezterm.lua" "$HOME/.wezterm.lua" 2>/dev/null \
-        || warn "Could not symlink wezterm.lua — run install.ps1 as Admin to create symlinks"
-
     echo
     success "Git Bash wired up!"
     warn "For full symlink support and package installs, open an admin PowerShell and run:"
     warn "  cd $DOTFILES && powershell -ExecutionPolicy RemoteSigned -File install.ps1"
+    echo
+    warn "For the best experience on Windows, install Windows Terminal from the Microsoft Store"
+    warn "and import the settings from: $DOTFILES/windows-terminal/settings.json"
 }
 
 # ── Verify ────────────────────────────────────────────────────────────────────
@@ -444,7 +491,7 @@ main() {
             printf "     Open a new terminal to start using Fish + Starship.\n\n"
             ;;
         windows)
-            printf "     Open a new WezTerm window to pick up your shell config.\n"
+            printf "     Open a new Windows Terminal window to pick up your shell config.\n"
             printf "     Run ${CYAN}install.ps1${RESET} as Admin in PowerShell for full setup.\n\n"
             ;;
     esac

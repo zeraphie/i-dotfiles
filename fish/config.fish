@@ -60,10 +60,7 @@ if test "$OS" = Linux
     fish_add_path --global /snap/bin
 end
 
-# Dotfiles bin
-if test -d "$HOME/Documents/Development/i-dotfiles/bin"
-    fish_add_path --global "$HOME/Documents/Development/i-dotfiles/bin"
-end
+# Dotfiles bin (added after DOTFILES is resolved below, see end of PATH section)
 
 # Rust / Cargo
 if test -d "$HOME/.cargo/bin"
@@ -97,12 +94,27 @@ if command -q starship
 end
 
 # ── Dotfiles ──────────────────────────────────────────────────────────────────
-set -gx DOTFILES "$HOME/Documents/Development/i-dotfiles"
+# Resolve DOTFILES from the symlinked config.fish back to the repo root
+set -gx DOTFILES (string replace '/fish/config.fish' '' (realpath (status filename)))
+
+# Dotfiles bin
+if test -d "$DOTFILES/bin"
+    fish_add_path --global "$DOTFILES/bin"
+end
 
 # ── Aliases ───────────────────────────────────────────────────────────────────
 # Sourced from a separate file to keep this config clean
 if test -f "$HOME/.config/fish/aliases.fish"
     source "$HOME/.config/fish/aliases.fish"
+end
+
+# ── Work / machine-specific configs ──────────────────────────────────────────
+# Drop .fish files into fish/work/ for work-specific aliases, env vars, etc.
+# These files are gitignored so they never get committed.
+if test -d "$DOTFILES/fish/work"
+    for f in $DOTFILES/fish/work/*.fish
+        test -f "$f"; and source "$f"
+    end
 end
 
 # ── Local / machine-specific overrides ───────────────────────────────────────

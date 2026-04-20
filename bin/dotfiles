@@ -109,6 +109,7 @@ path_exists() {
 declare -a ITEMS=(
   "Style Guide|ai/STYLE.md|STYLE.md|file"
   "AI System Prompt|ai/SYSTEM_PROMPT.md|.rules|file"
+  "Claude Code config|ai/CLAUDE.md|CLAUDE.md|file"
   "Zed Settings|ai/templates/zed/settings.json|.zed/settings.json|file"
   "oxlint config|ai/templates/project/oxlint.json|oxlint.json|file"
   "commitlint config|ai/templates/project/commitlint.config.js|commitlint.config.js|file"
@@ -305,9 +306,9 @@ cmd_link() {
       ((i++)) || true
     done
   elif command -v fzf &>/dev/null; then
-    mapfile -t selected_indices < <(pick_with_fzf)
+    while IFS= read -r line; do selected_indices+=("$line"); done < <(pick_with_fzf)
   else
-    mapfile -t selected_indices < <(pick_with_list)
+    while IFS= read -r line; do selected_indices+=("$line"); done < <(pick_with_list)
   fi
 
   if [[ "${#selected_indices[@]}" -eq 0 ]]; then

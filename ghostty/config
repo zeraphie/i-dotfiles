@@ -3,20 +3,20 @@
 # Izzy (zeraphie) — i-dotfiles
 #
 # Platform: macOS / Linux
-# On Windows, use WezTerm instead — see wezterm/wezterm.lua
+# On Windows, use Windows Terminal instead — see windows-terminal/settings.json
 # ============================================================
 
 # ------------------------------------------------------------
 # Shell
 # ------------------------------------------------------------
-command = fish
+# No 'command' set — Ghostty uses your login shell (set to fish by bootstrap)
 shell-integration = fish
 
 # ------------------------------------------------------------
 # Font
 # ------------------------------------------------------------
-font-family = "JetBrainsMono Nerd Font"
-font-family-fallback = "JetBrains Mono"
+font-family = "FiraCode Nerd Font Mono"
+font-family = "Fira Code"
 font-size = 13
 font-thicken = true
 
@@ -25,7 +25,7 @@ font-thicken = true
 # Palette based on the classic #1D1F20 dark background
 # ------------------------------------------------------------
 background = 1d1f20
-foreground = c5c8c6
+foreground = efefef
 
 # Black
 palette = 0=#1d1f20
@@ -66,8 +66,8 @@ cursor-style = bar
 cursor-style-blink = true
 
 # Selection
-selection-background = 373b41
-selection-foreground = c5c8c6
+selection-background = 9fb8d8
+selection-foreground = 1d1f20
 
 # ------------------------------------------------------------
 # Window
@@ -93,9 +93,8 @@ scrollback-limit = 10000
 # Performance / Rendering
 # ------------------------------------------------------------
 # GPU-accelerated rendering is on by default in Ghostty.
-# The option below keeps frame-rate reasonable without pegging
-# a GPU core when the terminal is idle.
-fps-cap = 120
+# Sync to display refresh rate to avoid tearing and unnecessary GPU usage.
+window-vsync = true
 
 # ------------------------------------------------------------
 # Keybindings

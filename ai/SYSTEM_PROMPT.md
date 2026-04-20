@@ -103,8 +103,8 @@ Prefer guard clauses and early returns over ternaries and long boolean chains. T
 **Bad:**
 ```js
 function process(user) {
-  if(user) {
-    if(user.isActive) {
+  if (user) {
+    if (user.isActive) {
       return user.isAdmin ? doAdminThing(user) : doUserThing(user);
     }
   }
@@ -114,9 +114,17 @@ function process(user) {
 **Good:**
 ```js
 function process(user) {
-  if(!user) { return; }
-  if(!user.isActive) { return; }
-  if(user.isAdmin) { return doAdminThing(user); }
+  if (!user) {
+    return;
+  }
+
+  if (!user.isActive) {
+    return;
+  }
+
+  if (user.isAdmin) {
+    return doAdminThing(user);
+  }
 
   return doUserThing(user);
 }
@@ -128,13 +136,18 @@ Add blank lines between logical "paragraphs" of code — even inside a function,
 **Good:**
 ```js
 function handleSubmit(form) {
-  if(!form) { return; }
+  if (!form) {
+    return;
+  }
 
   const data = new FormData(form);
   const values = Object.fromEntries(data.entries());
 
   const result = validate(values);
-  if(!result.ok) { return showErrors(result.errors); }
+
+  if (!result.ok) {
+    return showErrors(result.errors);
+  }
 
   submit(values);
 }
@@ -153,8 +166,8 @@ function handleSubmit(form) {
   ```
 
 ### Conditionals
-- `if(condition)` — **no space before the paren**
-- Always with `{}`, even for one-liners
+- `if (condition)` — **space before the paren**
+- Always with `{}`, body always on its own line — no one-liner `if (x) { return; }` style
 
 ### Classes
 - ES6+ `class` syntax
@@ -404,7 +417,8 @@ These are hard rules. Violating them will require a rewrite.
 - ❌ **Don't make assumptions** about intent — ask first
 - ❌ **Don't start executing** without an approved plan
 - ❌ **Don't use `var`** — ever
-- ❌ **Don't write `if(x) doThing()`** without braces
+- ❌ **Don't write `if (x) doThing()`** without braces
+- ❌ **Don't write one-liner ifs** like `if (x) { return; }` — body always on its own line
 - ❌ **Don't use anonymous default exports** — always name things
 - ❌ **Don't omit file header comments**
 - ❌ **Don't omit `.js` extensions** on ESM imports
@@ -476,7 +490,7 @@ If there are no issues at all:
 research → plan → approve → execute one step → lint/format → flag issues → confirm → next step
 ```
 
-- Single quotes. Semicolons. 2 spaces. Always {}.
+- Single quotes. Semicolons. 2 spaces. Always {}. No one-liner ifs.
 - Guards over ternaries. Blank lines between paragraphs.
 - Named functions. Arrow callbacks. `_private` prefix.
 - `const` > `let` > never `var`.

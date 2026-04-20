@@ -1,6 +1,6 @@
 # i-dotfiles
 
-> Izzy's cross-platform dotfiles — Fish + Starship + WezTerm + Mise
+> Izzy's cross-platform dotfiles — Fish + Starship + Ghostty + Mise
 
 ---
 
@@ -96,8 +96,8 @@ bun install
 |---|---|
 | [Fish](https://fishshell.com/) | Shell |
 | [Starship](https://starship.rs/) | Prompt |
-| [WezTerm](https://wezfurlong.org/wezterm/) | Terminal (Windows / Linux) |
-| [Ghostty](https://ghostty.org/) | Terminal (Mac) |
+| [Ghostty](https://ghostty.org/) | Terminal (macOS / Linux) |
+| [Windows Terminal](https://aka.ms/terminal) | Terminal (Windows) |
 | [Mise](https://mise.jdx.dev/) | Runtime version manager — replaces nvm, pyenv, rustup |
 | [Zed](https://zed.dev/) | Editor |
 | [Just](https://just.systems/) | Task runner |
@@ -133,8 +133,10 @@ i-dotfiles/
 │   └── config.toml            # Global runtime versions
 ├── starship/
 │   └── starship.toml          # Starship prompt config
-├── wezterm/
-│   └── wezterm.lua            # WezTerm config
+├── fonts/
+│   └── FiraCode/              # FiraCode Nerd Font (installed by bootstrap)
+├── windows-terminal/
+│   └── settings.json          # Windows Terminal config (matching theme + keybindings)
 ├── bootstrap.sh               # Cross-platform bootstrap (Mac / Linux / Windows Git Bash)
 └── justfile                   # Dotfiles task runner
 ```
@@ -161,7 +163,7 @@ just edit-fish        # open fish config
 just edit-aliases     # open aliases
 just edit-starship    # open starship config
 just edit-ghostty     # open ghostty config
-just edit-wezterm     # open wezterm config
+just edit-windows-terminal  # open windows terminal config
 just edit-git         # open gitconfig
 just edit-mise        # open mise config
 ```
@@ -284,6 +286,38 @@ Run `dotfiles link .` in any repo — the AI System Prompt option links `ai/SYST
 | Node.js | `lts` |
 | Python | `latest` |
 | Bun | `latest` |
+
+---
+
+## Windows setup notes
+
+### Windows Terminal
+
+Install [Windows Terminal](https://aka.ms/terminal) from the Microsoft Store (works on Windows 10+). Then copy the settings:
+
+1. Open Windows Terminal
+2. Press `Ctrl+,` to open Settings
+3. Click "Open JSON file" (bottom left)
+4. Replace the contents with `windows-terminal/settings.json` from this repo
+5. Install FiraCode Nerd Font from the `fonts/FiraCode/` directory (right-click `.ttf` files -> Install)
+
+### WSL2 (recommended for full Fish + Starship experience)
+
+WSL2 gives you a real Linux environment inside Windows, so you get the same Fish + Starship setup as macOS/Linux.
+
+```powershell
+# In an admin PowerShell — check if WSL is already installed
+wsl --status
+
+# If not installed
+wsl --install
+
+# After reboot, open Windows Terminal and select the Ubuntu tab, then:
+cd ~ && git clone https://github.com/zeraphie/i-dotfiles.git ~/i-dotfiles
+cd ~/i-dotfiles && ./bootstrap.sh
+```
+
+Windows Terminal auto-detects WSL distros and adds them as profiles.
 
 ---
 

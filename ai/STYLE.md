@@ -45,14 +45,14 @@ A living reference for how Izzy writes code. When in doubt, match what's already
 - **Line length:** Aim for 100 chars. Don't be rigid about it, but don't write 200-char lines.
 - **Trailing commas:** Yes, in multi-line arrays/objects/params.
 - **Braces on conditionals:** Always `{}`, even for single-line bodies — no exceptions.
-- **Space before paren in `if`/`for`/`while`:** No space. Write `if(condition)`, not `if (condition)`.
+- **Space before paren in `if`/`for`/`while`:** Always a space. Write `if (condition)`, not `if(condition)`.
 
 ```/dev/null/examples.js
-// ✗ bad — no braces, space before paren
+// ✗ bad — no braces
 if (thing) doSomething();
 
-// ✓ good — braces, no space before paren
-if(thing) {
+// ✓ good — braces, space before paren
+if (thing) {
   doSomething();
 }
 
@@ -60,7 +60,7 @@ if(thing) {
 const label = isActive ? 'Active' : 'Inactive';
 
 // ✓ good — guard + early return makes intent clear
-if(isActive) {
+if (isActive) {
   return 'Active';
 }
 
@@ -195,7 +195,7 @@ class Player {
 
   /** Start playback. */
   play() {
-    if(this.isPlaying) {
+    if (this.isPlaying) {
       return this;
     }
 
@@ -207,7 +207,7 @@ class Player {
 
   /** Pause playback. */
   pause() {
-    if(!this.isPlaying) {
+    if (!this.isPlaying) {
       return this;
     }
 
@@ -255,7 +255,7 @@ Never use a ternary or a long boolean chain where a guard would be clearer.
 ```/dev/null/guard-simple.js
 // ✗ bad — else branch adds nesting for no reason
 function greet(user) {
-  if(user.isLoggedIn) {
+  if (user.isLoggedIn) {
     return `Hello, ${user.name}!`;
   } else {
     return 'Hello, guest!';
@@ -264,7 +264,7 @@ function greet(user) {
 
 // ✓ good — guard the unhappy path first, fall through
 function greet(user) {
-  if(!user.isLoggedIn) {
+  if (!user.isLoggedIn) {
     return 'Hello, guest!';
   }
 
@@ -279,8 +279,8 @@ function greet(user) {
 ```/dev/null/guard-null.js
 // ✗ bad — everything nested inside the truthy check
 function getDisplayName(profile) {
-  if(profile) {
-    if(profile.displayName) {
+  if (profile) {
+    if (profile.displayName) {
       return profile.displayName;
     } else {
       return profile.email;
@@ -292,11 +292,11 @@ function getDisplayName(profile) {
 
 // ✓ good — each failure exits immediately, happy path at the bottom
 function getDisplayName(profile) {
-  if(!profile) {
+  if (!profile) {
     return 'Anonymous';
   }
 
-  if(!profile.displayName) {
+  if (!profile.displayName) {
     return profile.email;
   }
 
@@ -320,11 +320,11 @@ function getStatusLabel(status) {
 
 // ✓ good — one exit per case, instantly scannable
 function getStatusLabel(status) {
-  if(status === 'active') {
+  if (status === 'active') {
     return 'Currently Active';
   }
 
-  if(status === 'pending') {
+  if (status === 'pending') {
     return 'Awaiting Approval';
   }
 
@@ -339,26 +339,26 @@ function getStatusLabel(status) {
 ```/dev/null/guard-boolean.js
 // ✗ bad — one long condition is hard to parse and hard to debug
 function canPublish(user, post) {
-  if(user.isLoggedIn && user.role === 'editor' && !post.isLocked && post.authorId === user.id) {
+  if (user.isLoggedIn && user.role === 'editor' && !post.isLocked && post.authorId === user.id) {
     publish(post);
   }
 }
 
 // ✓ good — each condition is its own named guard
 function canPublish(user, post) {
-  if(!user.isLoggedIn) {
+  if (!user.isLoggedIn) {
     return;
   }
 
-  if(user.role !== 'editor') {
+  if (user.role !== 'editor') {
     return;
   }
 
-  if(post.isLocked) {
+  if (post.isLocked) {
     return;
   }
 
-  if(post.authorId !== user.id) {
+  if (post.authorId !== user.id) {
     return;
   }
 
@@ -380,7 +380,7 @@ function submitForm(formData) {
   const name = formData.get('name').trim();
   const email = formData.get('email').trim().toLowerCase();
   const message = formData.get('message').trim();
-  if(!name || !email || !message) {
+  if (!name || !email || !message) {
     showError('All fields are required.');
     return;
   }
@@ -390,7 +390,7 @@ function submitForm(formData) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
-  if(!response.ok) {
+  if (!response.ok) {
     showError('Something went wrong. Please try again.');
     return;
   }
@@ -406,7 +406,7 @@ async function submitForm(formData) {
   const message = formData.get('message').trim();
 
   // Guard: all fields required
-  if(!name || !email || !message) {
+  if (!name || !email || !message) {
     showError('All fields are required.');
     return;
   }
@@ -420,7 +420,7 @@ async function submitForm(formData) {
   });
 
   // Guard: handle server error
-  if(!response.ok) {
+  if (!response.ok) {
     showError('Something went wrong. Please try again.');
     return;
   }
@@ -731,12 +731,12 @@ import './UserCard.scss';
  */
 function UserCard({ user, compact = false }) {
   // Guard: nothing to render without a user
-  if(!user) {
+  if (!user) {
     return null;
   }
 
   // Guard: compact variant has its own layout
-  if(compact) {
+  if (compact) {
     return (
       <div className='user-card user-card--compact'>
         <img className='user-card__avatar' src={user.avatarUrl} alt={user.name} />
@@ -771,15 +771,15 @@ Guards work the same in JSX as in plain JS. Handle missing data, loading states,
 function ProfilePage({ userId }) {
   const { data: user, isLoading, error } = useUser(userId);
 
-  if(isLoading) {
+  if (isLoading) {
     return <LoadingSpinner />;
   }
 
-  if(error) {
+  if (error) {
     return <ErrorMessage message={error.message} />;
   }
 
-  if(!user) {
+  if (!user) {
     return <EmptyState message='User not found.' />;
   }
 
@@ -852,7 +852,7 @@ For personal projects, always default to SCSS. For work projects, match the exis
  * @complexity O(1)
  */
 function normaliseScore(raw, min, max) {
-  if(max === min) {
+  if (max === min) {
     return 0;
   }
 

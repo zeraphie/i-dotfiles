@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__acp__Bash",
+      "mcp__acp__Edit",
+      "WebFetch(domain:ghostty.org)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "mcp__acp__Write"
+    ]
+  }
+}

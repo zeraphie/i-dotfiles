@@ -25,6 +25,9 @@ local/
 *.local.toml
 *.local.sh
 
+# Work-specific configs (gitignored, loaded dynamically)
+fish/work/*.fish
+
 # Secrets / environment variables — never commit these
 .env
 .env.*

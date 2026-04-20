@@ -25,13 +25,6 @@ function c --description 'Smart cd: navigate, print underlined path, list direct
 
     echo
 
-    # List directory contents — use exa/eza if available, fall back to ls
-    if command -q eza
-        eza --group-directories-first --icons -F $argv
-    else if command -q exa
-        exa --group-directories-first -F $argv
-    else
-        # -h human sizes, -F type indicators, cross-platform (no -G needed in fish)
-        ls -lahF
-    end
+    # List directory contents — compact columnar view with type indicators
+    ls -hF
 end
