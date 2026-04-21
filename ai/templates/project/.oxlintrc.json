@@ -28,7 +28,6 @@
     "no-console": "warn",
     "no-debugger": "error",
     "no-empty": "error",
-    "no-extra-semi": "error",
     "no-redeclare": "error",
     "no-shadow": "warn",
     "no-use-before-define": [
@@ -39,29 +38,30 @@
         "variables": true
       }
     ],
-    "prefer-template": "error",
+    "prefer-template": "off",
     "object-shorthand": ["error", "always"],
     "no-useless-constructor": "error",
     "no-useless-return": "error",
     "no-else-return": "error",
     "no-lonely-if": "error",
-    "consistent-return": "warn"
+    "consistent-return": "warn",
+    "no-control-regex": "off"
   },
   "overrides": [
     {
-      "files": ["tests/**/*.js", "tests/**/*.ts", "**/*.test.js", "**/*.test.ts", "**/*.spec.js", "**/*.spec.ts"],
+      "files": [
+        "tests/**/*.js",
+        "tests/**/*.ts",
+        "**/*.test.js",
+        "**/*.test.ts",
+        "**/*.spec.js",
+        "**/*.spec.ts"
+      ],
       "rules": {
         "no-console": "off",
         "no-shadow": "off"
       }
     }
   ],
-  "ignore": {
-    "patterns": [
-      "node_modules",
-      "dist",
-      "coverage",
-      ".git"
-    ]
-  }
+  "ignorePatterns": ["node_modules", "dist", "coverage", ".git"]
 }
