@@ -5,7 +5,26 @@
       "mcp__acp__Edit",
       "WebFetch(domain:ghostty.org)",
       "WebFetch(domain:raw.githubusercontent.com)",
-      "mcp__acp__Write"
+      "mcp__acp__Write",
+      "WebFetch(domain:jordaneldredge.com)",
+      "Bash(fish -c \"functions -q bass && echo 'bass: yes' || echo 'bass: no'; functions -q nvm && echo 'nvm: yes' || echo 'nvm: no'; functions -q fisher && echo 'fisher: yes' || echo 'fisher: no'\")",
+      "Bash(fish --version)",
+      "Bash(echo \"fish version: $\\(fish --version\\)\")",
+      "Bash(git fetch *)",
+      "Bash(git log *)",
+      "Bash(curl -fsSL https://api.github.com/repos/jorgebucaran/fisher/releases/latest)",
+      "Bash(curl -fsSL https://api.github.com/repos/jorgebucaran/nvm.fish/releases/latest)",
+      "Bash(curl -fsSL https://api.github.com/repos/nvm-sh/nvm/releases/latest)",
+      "Bash(fish *)",
+      "Bash(git *)"
     ]
-  }
+  },
+  "disabledMcpjsonServers": [
+    "opensearch",
+    "jaeger",
+    "aws",
+    "github",
+    "gcp",
+    "sentry"
+  ]
 }

@@ -1,20 +1,44 @@
-# Project
+# {{PROJECT_NAME}} — CLAUDE.md
 
-Read the project's own README or PLAN file for goals and architecture.
+<!-- Copied by `dotfiles link`. Edit freely — this is your project's copy. -->
 
-## Rules
+{{PROJECT_NOTES}}
 
-- **Style & judgment calls** → `STYLE.md`
-- **Workflow, security, privacy, flagging** → `.rules` (SYSTEM_PROMPT)
-- **Mechanical formatting** → `.oxfmtrc.json` (oxfmt enforces it)
-- **Mechanical lint rules** → `.oxlintrc.json` (oxlint enforces it)
+## Key paths
 
-Do not duplicate what the linter/formatter already enforces. The prompt is for judgment calls only.
+{{KEY_PATHS}}
 
-## Hooks
+## Style
 
-**PostToolUse (Write|Edit):** Runs `node --check` on any `.js` file after it's written or edited. Catches syntax errors immediately.
+See [.ai/STYLE.md](.ai/STYLE.md) for code style rules.
 
-## Useful skills
+Mechanical formatting is handled by **oxfmt** (`.oxfmtrc.json`). Mechanical linting is handled by **oxlint** (`.oxlintrc.json`). Use `/enforce-style` to review code against the style guide.
 
-- `/simplify` — review a module for quality and efficiency
+## Security
+
+See [.ai/SECURITY.md](.ai/SECURITY.md) for security and privacy rules.
+
+Use `/review-security` to audit code for vulnerabilities.
+
+## Tooling
+
+- Package manager: **bun**
+- Task runner: **just**
+- Linter: **oxlint** (never ESLint)
+- Formatter: **oxfmt** (never Prettier)
+
+## Commits
+
+Conventional commits via commitlint. Branches: `feat/thing`, `fix/thing`, `chore/thing`.
+
+## Shell scripts
+
+Any shell scripts in this repo must run on **Bash 3.2** (macOS default). No Bash 4+ features:
+no `${var,,}`, no `mapfile`, no associative arrays. Use `tr` for case conversion and
+`while IFS= read -r line` for reading lines.
+
+## Slash commands
+
+- `/enforce-style` — review code against `.ai/STYLE.md` and apply fixes
+- `/review-security` — audit code using `.ai/SECURITY.md` (auto-detects fintech context from git remote)
+- `/setup-project` — run `dotfiles link .` to copy shared config into this project

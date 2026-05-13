@@ -4,13 +4,13 @@
 #
 # Usage:
 #   dotfiles link .           — interactive fzf picker (falls back to numbered list)
-#   dotfiles link . --all     — link everything without prompting
+#   dotfiles link . --all     — copy everything without prompting
 #   dotfiles link /path/to/project
-#   dotfiles link . --all
+#   dotfiles status .         — show which configs are up to date / modified / missing
+#   dotfiles unlink .         — remove copied files and clean .git/info/exclude
 #
-# Windows note:
-#   Symlinks require Developer Mode (Settings → Update & Security → For Developers).
-#   This script uses PowerShell's New-Item on Windows to create real symlinks.
+# Files are copied (not symlinked) so they can be edited freely in each project.
+# Use 'dotfiles status' to see if they have drifted from the source.
 
 set -euo pipefail
 
@@ -34,115 +34,43 @@ header()  { printf "\n${MAGENTA}${BOLD}  %s${RESET}\n\n" "$*"; }
 # The script lives in $DOTFILES/bin/dotfiles, so DOTFILES is one level up.
 DOTFILES="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-# ── OS detection ──────────────────────────────────────────────────────────────
-is_windows() {
-  case "$(uname -s)" in
-    MINGW*|MSYS*|CYGWIN*) return 0 ;;
-    *) return 1 ;;
-  esac
-}
-
-# Convert a Git Bash /c/Users/... path to a Windows C:\Users\... path
-to_windows_path() {
-  local path="$1"
-  # /c/foo/bar → C:\foo\bar
-  echo "$path" | sed 's|^/\([a-zA-Z]\)/|\1:\\|' | sed 's|/|\\|g'
-}
-
-# Create a symlink in a cross-platform way.
-# On Windows, uses PowerShell New-Item so Developer Mode symlinks work.
-# On Mac/Linux, uses ln -sf.
-make_symlink() {
-  local src="$1"
-  local dst="$2"
-
-  if is_windows; then
-    local win_src win_dst
-    win_src="$(to_windows_path "$src")"
-    win_dst="$(to_windows_path "$dst")"
-    powershell.exe -NoProfile -NonInteractive -Command \
-      "New-Item -ItemType SymbolicLink -Path '$win_dst' -Target '$win_src' -Force | Out-Null" \
-      2>/dev/null
-    return $?
-  fi
-
-  ln -sf "$src" "$dst"
-}
-
-# Check if a path is a symlink pointing at the expected target, cross-platform.
-is_linked_to() {
-  local dst="$1"
-  local src="$2"
-
-  if is_windows; then
-    local win_dst win_src
-    win_dst="$(to_windows_path "$dst")"
-    win_src="$(to_windows_path "$src")"
-    local target
-    target="$(powershell.exe -NoProfile -NonInteractive -Command \
-      "(Get-Item '$win_dst' -Force -ErrorAction SilentlyContinue).Target" \
-      2>/dev/null | tr -d '\r')"
-    [[ "$target" == "$win_src" ]]
-    return $?
-  fi
-
-  [[ -L "$dst" && "$(readlink "$dst")" == "$src" ]]
-}
-
-# Check if a path exists (file, dir, or symlink), cross-platform.
-path_exists() {
-  local path="$1"
-
-  if is_windows; then
-    local win_path
-    win_path="$(to_windows_path "$path")"
-    powershell.exe -NoProfile -NonInteractive -Command \
-      "Test-Path '$win_path'" 2>/dev/null | grep -qi "true"
-    return $?
-  fi
-
-  [[ -e "$path" || -L "$path" ]]
-}
-
-# ── Linkable items ────────────────────────────────────────────────────────────
-# Each entry is: "display name|source (relative to DOTFILES)|destination (relative to project)|is_dir"
+# ── Items ─────────────────────────────────────────────────────────────────────
+# Each entry: "display name|source (relative to DOTFILES)|destination (relative to project)"
 declare -a ITEMS=(
-  "Style Guide|ai/STYLE.md|STYLE.md|file"
-  "AI System Prompt|ai/SYSTEM_PROMPT.md|.rules|file"
-  "Claude Code config|ai/CLAUDE.md|CLAUDE.md|file"
-  "Zed Settings|ai/templates/zed/settings.json|.zed/settings.json|file"
-  "oxlint config|ai/templates/project/.oxlintrc.json|.oxlintrc.json|file"
-  "oxfmt config|ai/templates/project/.oxfmtrc.json|.oxfmtrc.json|file"
-  "commitlint config|ai/templates/project/commitlint.config.js|commitlint.config.js|file"
-  "vitest config|ai/templates/project/vitest.config.js|vitest.config.js|file"
-  "CI workflow|ai/templates/project/.github/workflows/ci.yml|.github/workflows/ci.yml|file"
+  "Style Guide|ai/STYLE.md|.ai/STYLE.md"
+  "Security rules|ai/SECURITY.md|.ai/SECURITY.md"
+  "Claude Code config|ai/CLAUDE.md|CLAUDE.md"
+  "Slash: /enforce-style|ai/commands/enforce-style.md|.claude/commands/enforce-style.md"
+  "Slash: /review-security|ai/commands/review-security.md|.claude/commands/review-security.md"
+  "Slash: /setup-project|ai/commands/setup-project.md|.claude/commands/setup-project.md"
+  "Zed settings|ai/templates/zed/settings.json|.zed/settings.json"
+  "oxlint config|ai/templates/project/.oxlintrc.json|.oxlintrc.json"
+  "oxfmt config|ai/templates/project/.oxfmtrc.json|.oxfmtrc.json"
+  "commitlint config|ai/templates/project/commitlint.config.js|commitlint.config.js"
+  "vitest config|ai/templates/project/vitest.config.js|vitest.config.js"
+  "CI workflow|ai/templates/project/.github/workflows/ci.yml|.github/workflows/ci.yml"
 )
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
-# Resolve the target project directory
 resolve_project() {
   local target="${1:-.}"
-
   if [[ "$target" == "." ]]; then
     echo "$PWD"
-    return
+  else
+    cd "$target" && pwd
   fi
-
-  echo "$(cd "$target" && pwd)"
 }
 
-# Check if the project directory is a git repo
 assert_git_repo() {
   local project="$1"
-
   if [[ ! -d "$project/.git" ]]; then
     error "$project is not a git repository"
     exit 1
   fi
 }
 
-# Add a path to .git/info/exclude so it's ignored locally without touching .gitignore
+# Add a path to .git/info/exclude so it is ignored locally without touching .gitignore
 exclude_locally() {
   local project="$1"
   local path="$2"
@@ -155,14 +83,32 @@ exclude_locally() {
   echo "$path" >> "$exclude_file"
 }
 
-# Create a symlink, backing up any existing file, and exclude it locally from git
-link_item() {
+# Remove a path from .git/info/exclude
+clean_exclude() {
+  local project="$1"
+  local path="$2"
+  local exclude_file="$project/.git/info/exclude"
+
+  if [[ ! -f "$exclude_file" ]]; then
+    return
+  fi
+
+  # Avoid sed -i portability issues between macOS and Linux — use a tmp file
+  grep -vxF "$path" "$exclude_file" > "${exclude_file}.tmp" \
+    && mv "${exclude_file}.tmp" "$exclude_file"
+}
+
+# Copy a source file into the project.
+# - If destination content matches source: report "up to date", skip copy.
+# - If destination differs: back it up, then copy fresh.
+# - If destination is absent: create parent dirs and copy.
+copy_item() {
   local project="$1"
   local src="$2"
   local dst_rel="$3"
   local dst="$project/$dst_rel"
 
-  if [[ ! -e "$src" ]]; then
+  if [[ ! -f "$src" ]]; then
     error "Source does not exist: $src"
     return 1
   fi
@@ -174,57 +120,50 @@ link_item() {
     mkdir -p "$parent"
   fi
 
-  # Already correctly linked
-  if is_linked_to "$dst" "$src"; then
-    printf "${GREEN}${BOLD}  ✓${RESET}  Already linked: ${CYAN}%s${RESET}\n" "$dst_rel"
+  # Already up to date — nothing to do
+  if [[ -f "$dst" ]] && diff -q "$src" "$dst" &>/dev/null; then
+    printf "  ${GREEN}✓${RESET}  ${CYAN}%-44s${RESET} up to date\n" "$dst_rel"
     exclude_locally "$project" "$dst_rel"
     return
   fi
 
-  # Back up existing file
-  if path_exists "$dst"; then
+  # Destination exists but differs — back it up before overwriting
+  if [[ -f "$dst" ]]; then
     local backup="${dst}.backup.$(date +%Y%m%d_%H%M%S)"
-    warn "Backing up existing: $dst_rel → $(basename "$backup")"
-    mv "$dst" "$backup"
+    warn "Backing up modified: $dst_rel → $(basename "$backup")"
+    cp "$dst" "$backup"
   fi
 
-  if ! make_symlink "$src" "$dst"; then
-    if is_windows; then
-      error "Failed to create symlink: $dst_rel"
-      error "Make sure Developer Mode is enabled:"
-      error "  Settings → Update & Security → For Developers → Developer Mode"
-    else
-      error "Failed to create symlink: $dst_rel"
-    fi
-    return 1
-  fi
-
+  cp "$src" "$dst"
   exclude_locally "$project" "$dst_rel"
-  printf "${GREEN}${BOLD}  ✓${RESET}  Linked: ${CYAN}%s${RESET}\n" "$dst_rel"
+  printf "  ${GREEN}✓${RESET}  ${CYAN}%-44s${RESET} copied\n" "$dst_rel"
 }
 
 # ── Pickers ───────────────────────────────────────────────────────────────────
 
-# fzf picker — returns indices of selected items
+# fzf multi-picker — prints indices of selected items to stdout
 pick_with_fzf() {
-  local names=()
+  local -a names
+  names=()
+  local i=0
   for item in "${ITEMS[@]}"; do
     names+=("$(echo "$item" | cut -d'|' -f1)")
+    ((i++)) || true
   done
 
   local selected
   selected="$(printf '%s\n' "${names[@]}" | fzf \
     --multi \
-    --prompt='Select items to link (TAB to select, ENTER to confirm): ' \
-    --header='Dotfiles → project linker' \
+    --prompt='Select items to copy (TAB to select, ENTER to confirm): ' \
+    --header='dotfiles → project' \
     --preview-window=hidden \
     --height=~50% \
     --border=rounded \
     --color='prompt:#89b4fa,header:#cba6f7,pointer:#f38ba8,marker:#a6e3a1'
   )"
 
-  # Map selected names back to indices
-  local i=0
+  # Map selected display names back to their indices
+  i=0
   for item in "${ITEMS[@]}"; do
     local name
     name="$(echo "$item" | cut -d'|' -f1)"
@@ -235,7 +174,7 @@ pick_with_fzf() {
   done
 }
 
-# Fallback numbered list picker for when fzf isn't available
+# Fallback numbered-list picker when fzf is not available
 pick_with_list() {
   echo ""
   local i=1
@@ -247,7 +186,7 @@ pick_with_list() {
   done
 
   echo ""
-  printf "${CYAN}  ?  ${RESET}Enter numbers to link (e.g. 1 3 5), or ${BOLD}a${RESET} for all, or ${BOLD}q${RESET} to quit: "
+  printf "  ${CYAN}?  ${RESET}Enter numbers to copy (e.g. 1 3 5), ${BOLD}a${RESET} for all, ${BOLD}q${RESET} to quit: "
   read -r answer
 
   if [[ "$answer" == "q" ]]; then
@@ -278,7 +217,6 @@ cmd_link() {
   local target="${1:-.}"
   local all=false
 
-  # Parse flags
   shift || true
   while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -296,20 +234,27 @@ cmd_link() {
   header "dotfiles → $(basename "$project")"
   info "Dotfiles: $DOTFILES"
   info "Project:  $project"
+  echo ""
 
-  local selected_indices=()
+  local -a selected_indices
+  selected_indices=()
 
   if [[ "$all" == true ]]; then
-    # Select all items
     local i=0
     for _ in "${ITEMS[@]}"; do
       selected_indices+=("$i")
       ((i++)) || true
     done
   elif command -v fzf &>/dev/null; then
-    while IFS= read -r line; do selected_indices+=("$line"); done < <(pick_with_fzf)
+    while IFS= read -r line; do
+      selected_indices+=("$line")
+    done < <(pick_with_fzf)
+    echo ""
   else
-    while IFS= read -r line; do selected_indices+=("$line"); done < <(pick_with_list)
+    while IFS= read -r line; do
+      selected_indices+=("$line")
+    done < <(pick_with_list)
+    echo ""
   fi
 
   if [[ "${#selected_indices[@]}" -eq 0 ]]; then
@@ -317,60 +262,17 @@ cmd_link() {
     exit 0
   fi
 
-  echo ""
-
   for idx in "${selected_indices[@]}"; do
     local item="${ITEMS[$idx]}"
     local src_rel dst_rel
     src_rel="$(echo "$item" | cut -d'|' -f2)"
     dst_rel="$(echo "$item" | cut -d'|' -f3)"
-    local src="$DOTFILES/$src_rel"
 
-    link_item "$project" "$src" "$dst_rel"
+    copy_item "$project" "$DOTFILES/$src_rel" "$dst_rel"
   done
 
   echo ""
-  success "Done! Linked files are excluded from git via .git/info/exclude."
-}
-
-cmd_unlink() {
-  local target="${1:-.}"
-  local project
-  project="$(resolve_project "$target")"
-
-  assert_git_repo "$project"
-
-  header "Unlink dotfiles from $(basename "$project")"
-
-  local found=false
-  for item in "${ITEMS[@]}"; do
-    local dst_rel
-    dst_rel="$(echo "$item" | cut -d'|' -f3)"
-    local dst="$project/$dst_rel"
-
-    if is_windows; then
-      local win_dst
-      win_dst="$(to_windows_path "$dst")"
-      local link_type
-      link_type="$(powershell.exe -NoProfile -NonInteractive -Command \
-        "(Get-Item '$win_dst' -Force -ErrorAction SilentlyContinue).LinkType" \
-        2>/dev/null | tr -d '\r')"
-      if [[ "$link_type" == "SymbolicLink" ]]; then
-        powershell.exe -NoProfile -NonInteractive -Command \
-          "Remove-Item '$win_dst' -Force" 2>/dev/null
-        found=true
-        success "Removed: $dst_rel"
-      fi
-    elif [[ -L "$dst" ]]; then
-      rm "$dst"
-      found=true
-      success "Removed: $dst_rel"
-    fi
-  done
-
-  if [[ "$found" == false ]]; then
-    info "No dotfile symlinks found in this project."
-  fi
+  success "Done! Files are excluded from git via .git/info/exclude."
 }
 
 cmd_status() {
@@ -380,62 +282,82 @@ cmd_status() {
 
   assert_git_repo "$project"
 
-  header "Dotfile links in $(basename "$project")"
+  header "Dotfile status in $(basename "$project")"
 
-  local found=false
   for item in "${ITEMS[@]}"; do
-    local name dst_rel
+    local name src_rel dst_rel
     name="$(echo "$item" | cut -d'|' -f1)"
+    src_rel="$(echo "$item" | cut -d'|' -f2)"
     dst_rel="$(echo "$item" | cut -d'|' -f3)"
+    local src="$DOTFILES/$src_rel"
     local dst="$project/$dst_rel"
 
-    if is_windows; then
-      local win_dst
-      win_dst="$(to_windows_path "$dst")"
-      local target
-      target="$(powershell.exe -NoProfile -NonInteractive -Command \
-        "(Get-Item '$win_dst' -Force -ErrorAction SilentlyContinue).Target" \
-        2>/dev/null | tr -d '\r')"
-      local win_dotfiles
-      win_dotfiles="$(to_windows_path "$DOTFILES")"
-      if [[ -n "$target" && "$target" == "$win_dotfiles"* ]]; then
-        printf "  ${GREEN}✓${RESET}  %-30s ${CYAN}%s${RESET}\n" "$name" "$dst_rel"
-        found=true
-      else
-        printf "  ${RED}✗${RESET}  %-30s ${YELLOW}not linked${RESET}\n" "$name"
-      fi
-    elif is_linked_to "$dst" "$DOTFILES"* 2>/dev/null || [[ -L "$dst" && "$(readlink "$dst")" == "$DOTFILES"* ]]; then
-      printf "  ${GREEN}✓${RESET}  %-30s ${CYAN}%s${RESET}\n" "$name" "$dst_rel"
-      found=true
+    if [[ ! -f "$dst" ]]; then
+      printf "  ${RED}✗${RESET}  ${BOLD}%-32s${RESET}  ${RED}not present${RESET}  %s\n" "$name" "$dst_rel"
+    elif diff -q "$src" "$dst" &>/dev/null; then
+      printf "  ${GREEN}✓${RESET}  ${BOLD}%-32s${RESET}  ${GREEN}up to date${RESET}  %s\n" "$name" "$dst_rel"
     else
-      printf "  ${RED}✗${RESET}  %-30s ${YELLOW}not linked${RESET}\n" "$name"
+      printf "  ${YELLOW}!${RESET}  ${BOLD}%-32s${RESET}  ${YELLOW}modified${RESET}    %s\n" "$name" "$dst_rel"
     fi
   done
 
   echo ""
 }
 
+cmd_unlink() {
+  local target="${1:-.}"
+  local project
+  project="$(resolve_project "$target")"
+
+  assert_git_repo "$project"
+
+  header "Remove dotfiles from $(basename "$project")"
+
+  local found=false
+  for item in "${ITEMS[@]}"; do
+    local dst_rel
+    dst_rel="$(echo "$item" | cut -d'|' -f3)"
+    local dst="$project/$dst_rel"
+
+    if [[ -f "$dst" ]]; then
+      rm "$dst"
+      clean_exclude "$project" "$dst_rel"
+      found=true
+      success "Removed: $dst_rel"
+    fi
+  done
+
+  if [[ "$found" == false ]]; then
+    info "No dotfile copies found in this project."
+  fi
+
+  echo ""
+}
+
 cmd_help() {
-  printf "\n${MAGENTA}${BOLD}  dotfiles${RESET} — link i-dotfiles config into any project\n\n"
+  printf "\n${MAGENTA}${BOLD}  dotfiles${RESET} — copy i-dotfiles config into any project\n\n"
   printf "  ${BOLD}Usage:${RESET}\n"
-  printf "    dotfiles link [path] [--all]   Link configs into a project\n"
-  printf "    dotfiles unlink [path]         Remove dotfile symlinks from a project\n"
-  printf "    dotfiles status [path]         Show which configs are linked\n"
+  printf "    dotfiles link [path] [--all]   Copy configs into a project\n"
+  printf "    dotfiles status [path]         Show which configs are current / modified / missing\n"
+  printf "    dotfiles unlink [path]         Remove copied files from a project\n"
   printf "    dotfiles help                  Show this help\n"
   printf "\n"
   printf "  ${BOLD}Options:${RESET}\n"
-  printf "    --all, -a    Skip the picker and link everything\n"
+  printf "    --all, -a    Skip the picker and copy everything\n"
   printf "    path         Project directory (defaults to current directory)\n"
   printf "\n"
   printf "  ${BOLD}Examples:${RESET}\n"
   printf "    dotfiles link .               Interactive picker in current dir\n"
-  printf "    dotfiles link . --all         Link everything to current dir\n"
+  printf "    dotfiles link . --all         Copy everything to current dir\n"
   printf "    dotfiles link ~/projects/foo  Interactive picker for another project\n"
-  printf "    dotfiles status .             See what's currently linked\n"
+  printf "    dotfiles status .             See what is current / modified / missing\n"
+  printf "    dotfiles unlink .             Remove all copied dotfiles from project\n"
   printf "\n"
   printf "  ${BOLD}Notes:${RESET}\n"
-  printf "    Linked files are added to .git/info/exclude — they won't\n"
-  printf "    appear in git status or be accidentally committed.\n\n"
+  printf "    Files are copied, not symlinked, so you can edit them freely in each\n"
+  printf "    project. Run 'dotfiles status' to see if they have drifted from source.\n"
+  printf "    Copied files are added to .git/info/exclude — they will not appear in\n"
+  printf "    git status or be accidentally committed.\n\n"
 }
 
 # ── Entrypoint ────────────────────────────────────────────────────────────────
@@ -444,9 +366,9 @@ COMMAND="${1:-help}"
 shift || true
 
 case "$COMMAND" in
-  link)    cmd_link "$@" ;;
-  unlink)  cmd_unlink "$@" ;;
-  status)  cmd_status "$@" ;;
+  link)           cmd_link "$@" ;;
+  status)         cmd_status "$@" ;;
+  unlink)         cmd_unlink "$@" ;;
   help|--help|-h) cmd_help ;;
   *)
     error "Unknown command: $COMMAND"

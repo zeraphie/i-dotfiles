@@ -192,6 +192,44 @@ setup_macos() {
         success "Mise runtimes installed"
     fi
 
+    # Fisher — Fish plugin manager (https://github.com/jorgebucaran/fisher)
+    # nvm.fish — native Fish rewrite of nvm; reads .nvmrc from work repos
+    # (https://github.com/jorgebucaran/nvm.fish)
+    if has fish; then
+        if fish -c "functions -q fisher"; then
+            success "fisher already installed"
+        else
+            info "Installing fisher..."
+            fish -c "curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher"
+            success "fisher installed"
+        fi
+
+        if grep -qF "jorgebucaran/nvm.fish" "$HOME/.config/fish/fish_plugins" 2>/dev/null; then
+            success "nvm.fish already installed"
+        else
+            info "Installing nvm.fish..."
+            fish -c "fisher install jorgebucaran/nvm.fish"
+            success "nvm.fish installed"
+        fi
+    else
+        warn "fish not on PATH — skipping fisher/nvm.fish setup. Re-run bootstrap after installing fish."
+    fi
+
+    # Claude Code CLI
+    if ! has claude; then
+        info "Installing Claude Code CLI..."
+        if has npm; then
+            npm install -g @anthropic-ai/claude-code \
+                && success "Claude Code installed" \
+                || warn "Could not install Claude Code — try manually: npm install -g @anthropic-ai/claude-code"
+        else
+            warn "npm not found — skipping Claude Code (requires Node 18+)"
+            warn "After installing Node: npm install -g @anthropic-ai/claude-code"
+        fi
+    else
+        success "Claude Code already installed"
+    fi
+
     # Make dotfiles bin executable
     chmod +x "$DOTFILES/bin/dotfiles"
 
@@ -259,7 +297,7 @@ setup_linux() {
         info "Installing Fish..."
         case "$OS" in
             debian)
-                sudo apt-add-repository -y ppa:fish-shell/release-4 2>/dev/null || true
+                sudo apt-add-repository -y ppa:fish-shell/release-4 || true
                 sudo apt-get update -q
                 sudo apt-get install -y fish
                 ;;
@@ -295,7 +333,7 @@ setup_linux() {
     if ! has just; then
         info "Installing Just..."
         case "$OS" in
-            debian) sudo apt-get install -y just 2>/dev/null || curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to /usr/local/bin ;;
+            debian) sudo apt-get install -y just || curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to /usr/local/bin ;;
             arch)   sudo pacman -S --noconfirm just ;;
             fedora) sudo dnf install -y just ;;
             *)      curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to ~/.local/bin ;;
@@ -333,6 +371,44 @@ setup_linux() {
         info "Installing mise runtimes..."
         mise install
         success "Mise runtimes installed"
+    fi
+
+    # Fisher — Fish plugin manager (https://github.com/jorgebucaran/fisher)
+    # nvm.fish — native Fish rewrite of nvm; reads .nvmrc from work repos
+    # (https://github.com/jorgebucaran/nvm.fish)
+    if has fish; then
+        if fish -c "functions -q fisher"; then
+            success "fisher already installed"
+        else
+            info "Installing fisher..."
+            fish -c "curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher"
+            success "fisher installed"
+        fi
+
+        if grep -qF "jorgebucaran/nvm.fish" "$HOME/.config/fish/fish_plugins" 2>/dev/null; then
+            success "nvm.fish already installed"
+        else
+            info "Installing nvm.fish..."
+            fish -c "fisher install jorgebucaran/nvm.fish"
+            success "nvm.fish installed"
+        fi
+    else
+        warn "fish not on PATH — skipping fisher/nvm.fish setup. Re-run bootstrap after installing fish."
+    fi
+
+    # Claude Code CLI
+    if ! has claude; then
+        info "Installing Claude Code CLI..."
+        if has npm; then
+            npm install -g @anthropic-ai/claude-code \
+                && success "Claude Code installed" \
+                || warn "Could not install Claude Code — try manually: npm install -g @anthropic-ai/claude-code"
+        else
+            warn "npm not found — skipping Claude Code (requires Node 18+)"
+            warn "After installing Node: npm install -g @anthropic-ai/claude-code"
+        fi
+    else
+        success "Claude Code already installed"
     fi
 
     # Make dotfiles bin executable
@@ -412,11 +488,11 @@ setup_windows() {
     # Starship symlink via ln (works in Git Bash if Developer Mode is on,
     # otherwise we just set the env var and let it find the file via PATH)
     mkdir -p "$HOME/.config"
-    make_link "$DOTFILES/starship/starship.toml" "$HOME/.config/starship.toml" 2>/dev/null \
+    make_link "$DOTFILES/starship/starship.toml" "$HOME/.config/starship.toml" \
         || warn "Could not symlink starship.toml — run install.ps1 as Admin to create symlinks"
 
     # Git config
-    make_link "$DOTFILES/git/.gitconfig" "$HOME/.gitconfig" 2>/dev/null \
+    make_link "$DOTFILES/git/.gitconfig" "$HOME/.gitconfig" \
         || warn "Could not symlink .gitconfig — run install.ps1 as Admin to create symlinks"
 
     echo
@@ -435,7 +511,7 @@ verify_install() {
     local tools=()
     case "$OS" in
         macos|linux|arch|debian|fedora)
-            tools=(fish starship mise git just bun)
+            tools=(fish starship mise git just bun claude)
             ;;
         windows)
             tools=(starship git bun)

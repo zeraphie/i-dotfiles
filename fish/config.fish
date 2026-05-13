@@ -85,6 +85,10 @@ if command -q mise
     mise activate fish | source
 end
 
+# ── nvm.fish ──────────────────────────────────────────────────────────────────
+# Native Fish nvm via fisher (jorgebucaran/nvm.fish). Provides its own `nvm`
+# function and reads .nvmrc files from work repos. Install via bootstrap.sh.
+
 # ── Starship Prompt ───────────────────────────────────────────────────────────
 # https://starship.rs/
 # Must come after mise so the right tool versions are available for the prompt
@@ -122,3 +126,7 @@ end
 if test -f "$HOME/.config/fish/local.fish"
     source "$HOME/.config/fish/local.fish"
 end
+
+# Added by OrbStack: command-line tools and integration
+# This won't be added again if you remove it.
+source ~/.orbstack/shell/init2.fish 2>/dev/null || :
