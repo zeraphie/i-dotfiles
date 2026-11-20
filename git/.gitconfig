@@ -196,3 +196,7 @@
 
 	# Current branch name
 	current  = rev-parse --abbrev-ref HEAD
+
+# Machine-specific overrides (not in this repo). Ignored if the file does not exist.
+[include]
+	path = ~/.gitconfig.local

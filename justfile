@@ -35,8 +35,11 @@ link:
         src="$1"
         dst="$2"
         mkdir -p "$(dirname "$dst")"
-        if [ -L "$dst" ]; then
+        if [ -L "$dst" ] && [ "$(readlink "$dst")" = "$src" ]; then
             echo "  ~ (already linked) $dst"
+        elif [ -L "$dst" ]; then
+            ln -sfn "$src" "$dst"
+            echo "  ↻ (relinked)       $dst"
         elif [ -e "$dst" ]; then
             echo "  ! (backing up)     $dst → $dst.bak"
             mv "$dst" "$dst.bak"
